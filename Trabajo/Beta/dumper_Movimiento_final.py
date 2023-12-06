@@ -80,26 +80,43 @@ def paint(maquina):
 
 vpl.QtFigure()        
 vpl.mesh_plot(escenario)
-n_steps=350
+n_steps=160
 for step in range(n_steps):
     x =step *50.0/n_steps
+
     cab=deepcopy(cabina)
     Tl =translate([x, 0.0, 0.0])
     Tf_cabina=Tl @Rz@Ry@Rx
     cab.transform(Tf_cabina)
-    rueda_i=deepcopy(rueda_delantera_izquierda)
+
+    rueda_izq_delante=deepcopy(rueda_delantera_izquierda)
     Tl =translate([1.3, -0.1, 1.2])
     Tf=(Tl @Rz@Ry@Rx) @Tf_cabina
-    rueda_i.transform(Tf)
-    rueda_d=deepcopy(rueda_delantera_derecha)
+    rueda_izq_delante.transform(Tf)
+
+    rueda_der_delante=deepcopy(rueda_delantera_derecha)
     Tl =translate([1.3, -0.1, -1.2])
     Tf=(Tl @Rz@Ry@Rx) @Tf_cabina
-    rueda_d.transform(Tf)
-    paint([cab, rueda_i, rueda_d])
+    rueda_der_delante.transform(Tf)
 
+    rueda_der_detras=deepcopy(rueda_trasera_derecha)
+    Tl =translate([1.3, -0.1, 1.2])
+    Tf=(Tl @Rz@Ry@Rx) @Tf_cabina
+    rueda_der_detras.transform(Tf)
+
+    rueda_izq_detras=deepcopy(rueda_trasera_izquierda)
+    Tl =translate([1.3, -0.1, -1.2])
+    Tf=(Tl @Rz@Ry@Rx) @Tf_cabina
+    rueda_izq_detras.transform(Tf)
+
+    paint([cab, rueda_izq_delante, rueda_izq_detras,rueda_der_delante, rueda_der_detras])
+
+#Posición final del dumper por el for
 vpl.mesh_plot(cab)
-vpl.mesh_plot(rueda_i)
-vpl.mesh_plot(rueda_d)
+vpl.mesh_plot(rueda_izq_delante)
+vpl.mesh_plot(rueda_izq_detras)
+vpl.mesh_plot(rueda_der_delante)
+vpl.mesh_plot(rueda_der_detras)
 
 mesh_actor = vpl.mesh_plot(origen)
 vpl.show()
