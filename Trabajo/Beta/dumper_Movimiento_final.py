@@ -80,7 +80,7 @@ def paint(maquina):
 
 vpl.QtFigure()        
 vpl.mesh_plot(escenario)
-n_steps=100
+n_steps=350
 for step in range(n_steps):
     x =step *50.0/n_steps
     cab=deepcopy(cabina)
