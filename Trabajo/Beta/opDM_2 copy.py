@@ -85,73 +85,22 @@ rueda_trasera_delantera_copia2 = transform_and_plot(rueda_delantera_izquierda, [
 vpl.QtFigure()        
 vpl.mesh_plot(escenario)
 
-# # Animación de la máquina moviéndose
-# n_steps = 150
-# for step in range(n_steps):
-#     x = step * 50.0 / n_steps
-#     cab = deepcopy(cabina)
-#     Tl = translate([x, 0.0, 0.0])
-#     Tf_cabina = Tl @ Rz @ Ry @ Rx
-#     cab.transform(Tf_cabina)
-
-#     rueda_i = deepcopy(rueda_delantera_izquierda)
-#     Tl = translate([1.3, -0.1, 1.2])
-#     Tf = (Tl @ Rz @ Ry @ Rx) @ Tf_cabina
-#     rueda_i.transform(Tf)
-#     paint([cab, rueda_i])
-
-# Inicialización de transformaciones
-Tf_cabina = np.identity(4)
-Tf_rueda = translate([1.3, -0.1, 1.2])
-
 # Animación de la máquina moviéndose
 n_steps = 150
 for step in range(n_steps):
     x = step * 50.0 / n_steps
     cab = deepcopy(cabina)
+    Tl = translate([x, 0.0, 0.0])
+    Tf_cabina = Tl @ Rz @ Ry @ Rx
+    cab.transform(Tf_cabina)
+
     rueda_i = deepcopy(rueda_delantera_izquierda)
-
-    
-    # Transformación de la cabina
-    Tl = translate([x, 0.0, 0.0])
-    Tf_cabina = Tl @ Rz @ Ry @ Rx
-    
-    # Transformación de las ruedas
-    Tf_rueda = Tl @ Tf_rueda
-    
-    # Aplicar transformaciones a las instancias existentes
-    cab.transform(Tf_cabina)
-    rueda_i.transform(Tf_rueda)
-    
-    # Pintar la escena en cada paso
-    paint([cab, rueda_i])
-
-""""
-# Inicialización de transformaciones
-Tf_cabina = np.identity(4)
-Tf_rueda = translate([1.3, -0.1, 1.2])
-
-# Animación de la máquina moviéndose
-n_steps = 150
-for step in range(n_steps):
-    x = step * 50.0 / n_steps
-    
-    # Transformación de la cabina
-    Tl = translate([x, 0.0, 0.0])
-    Tf_cabina = Tl @ Rz @ Ry @ Rx
-    
-    # Transformación de las ruedas
-    Tf_rueda = Tl @ Tf_rueda
-    
-    # Aplicar transformaciones a las instancias existentes
-    cab.transform(Tf_cabina)
-    rueda_i.transform(Tf_rueda)
-    
-    # Pintar la escena en cada paso
+    Tl = translate([1.3, -0.1, 1.2])
+    Tf = (Tl @ Rz @ Ry @ Rx) @ Tf_cabina
+    rueda_i.transform(Tf)
     paint([cab, rueda_i])
 
 
-"""
 # Visualización final
 vpl.mesh_plot(cab)
 vpl.mesh_plot(rueda_i)

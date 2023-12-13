@@ -1,10 +1,17 @@
 import stl
 import vtkplotlib as vpl
+import time
 import numpy as np
 from copy import deepcopy
 
+time.sleep(1)
 def load_mesh(file_path):
     return stl.mesh.Mesh.from_file(file_path)
+
+def translate(translation):
+    matrix = np.identity(4)
+    matrix[0:3, 3] = translation
+    return matrix
 
 def transform_and_plot(mesh, translation, rotation_matrix):
     mesh_copy = deepcopy(mesh)
@@ -13,22 +20,15 @@ def transform_and_plot(mesh, translation, rotation_matrix):
     vpl.mesh_plot(mesh_copy)
     return mesh_copy
 
-""""
-cabina => [0.0, 0.0, 0.0]
-plataforma_trasera => [0.0, 0.0, 0.0]
-plataforma_de_giro => [-1.05, 0.25, 0.0]
-cubo => [-1.04, 0.63, 0]
-rueda_delantera_izquierda => [1.3, -0.1, 1.2]
-rueda_delantera_derecha => [1.3, -0.1, -1.2]
-rueda_trasera_izquierda => [-1.4, -0.1, 1.2]
-rueda_trasera_derecha => [-1.4, -0.1, -1.2]
-"""
+def paint(dumper):
+    lista = [vpl.mesh_plot(piece) for piece in dumper]
+    figure = vpl.gcf()
+    figure.update()
+    figure.show(block=False)
+    for piece in lista:
+        figure.remove_plot(piece)
 
-def translate(translation):
-    matrix = np.identity(4)
-    matrix[0:3, 3] = translation
-    return matrix
-
+# Inicialización de matrices de rotación
 Rz = Ry = Rx = np.identity(4)
 
 # Carga de modelos
@@ -41,58 +41,48 @@ caja = load_mesh("Trabajo/Stl/Tanque_Mejor2.STL")
 origen = stl.mesh.Mesh(np.concatenate([cabina.data, 
                                        rueda_delantera_izquierda.data,
                                        caja.data,
-                                       ]))
-
-# Función para pintar la máquina
-def paint(dumper):
-    lista = [vpl.mesh_plot(piece) for piece in dumper]
-    figure = vpl.gcf()
-    figure.update()
-    figure.show(block=False)
-    for piece in lista:
-        figure.remove_plot(piece)
-
-# Par ruedas delante y atrás:
-def hot_wheels(traslacion):
-    wheel_copy = deepcopy(rueda_delantera_izquierda)
-    Tl = translate(traslacion)
-    Tf = Tl @ Rz @ Ry @ Rx
-    wheel_copy.transform(Tf)
-    vpl.mesh_plot(wheel_copy)
-
-hot_wheels([1.3, -0.1, 1.2])
-hot_wheels([1.3, -0.1, -1.2])
-hot_wheels([-1.4, -0.1, 1.2])
-hot_wheels([-1.4, -0.1, -1.2])
-
-# Copia y transformación de la cabina
-cabina_copia = transform_and_plot(cabina, [5.0, 0.0, 0.0], Rz @ Ry @ Rx)
-
-# Copias y transformaciones de las ruedas delanteras
-rueda_delantera_izquierda_copia2 = transform_and_plot(rueda_delantera_izquierda, [1.3, -0.1, 1.2], Rz @ Ry @ Rx @ translate([5.0, 0.0, 0.0]))
-
+                                       ]*2))
 
 # Visualización del escenario
 vpl.QtFigure()        
 vpl.mesh_plot(escenario)
 
+# Inicialización de transformaciones
+Tf_cabina = np.identity(4)
+Tf_rueda = translate([1.3, -0.1, 1.2])
+
+# Ajuste de velocidad de animación
+animation_speed = 0.1
+
 # Animación de la máquina moviéndose
 n_steps = 150
 for step in range(n_steps):
     x = step * 50.0 / n_steps
-    cab = deepcopy(cabina)
+    
+    # Transformación de la cabina
     Tl = translate([x, 0.0, 0.0])
     Tf_cabina = Tl @ Rz @ Ry @ Rx
-    cab.transform(Tf_cabina)
-    rueda_i = deepcopy(rueda_delantera_izquierda)
-    Tl = translate([1.3, -0.1, 1.2])
-    Tf = (Tl @ Rz @ Ry @ Rx) @ Tf_cabina
-    rueda_i.transform(Tf)
-    paint([cab, rueda_i])
+    
+    # Transformación de las ruedas
+    Tf_rueda = Tl @ Tf_rueda
+    
+    # Aplicar transformaciones a las instancias existentes
+    cabina.transform(Tf_cabina)
+    rueda_delantera_izquierda.transform(Tf_rueda)
+    
+    # Pintar la escena en cada paso
+    paint([cabina, rueda_delantera_izquierda])
+    
+    # Añadir un pequeño retraso para ajustar la velocidad de la animación
+    vpl.pause(animation_speed)
 
 # Visualización final
-vpl.mesh_plot(cab)
-vpl.mesh_plot(rueda_i)
+cab_final = deepcopy(cabina)
+cab_final.transform(Tf_cabina)
 
-mesh_actor = vpl.mesh_plot(origen)
+rueda_final = deepcopy(rueda_delantera_izquierda)
+rueda_final.transform(Tf_rueda)
+
+vpl.mesh_plot(cab_final)
+vpl.mesh_plot(rueda_final)
 vpl.show()
