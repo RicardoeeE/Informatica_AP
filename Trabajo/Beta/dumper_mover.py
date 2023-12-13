@@ -15,10 +15,13 @@ def main():
     escenario = stl.mesh.Mesh.from_file("Trabajo/Stl/escenario.stl") 
     cabina = stl.mesh.Mesh.from_file("Trabajo/Stl/cabina.stl")
     rueda_delantera_izquierda = stl.mesh.Mesh.from_file("Trabajo/Stl/rueda_delantera_izquierda.stl")
+    cubo=stl.mesh.Mesh.from_file("Trabajo/Stl/Tanque_Mejor2.STL")
 
     # Concatenación de matrices de vértices y caras
     origen = stl.mesh.Mesh(np.concatenate([cabina.data, 
-                                           rueda_delantera_izquierda.data]*4))
+                                           rueda_delantera_izquierda.data,
+                                           cubo.data
+                                           ]))
 
     # Par ruedas delante y atrás:
     def plot_wheel(translation):
@@ -28,10 +31,26 @@ def main():
         wheel_copy.transform(Tf)
         vpl.mesh_plot(wheel_copy)
 
+
+    # rueda_delantera_izquierda
     plot_wheel([1.3, -0.1, 1.2])
+
+    # rueda_delantera_derecha
     plot_wheel([1.3, -0.1, -1.2])
+
+    # rueda_trasera_izquierda
     plot_wheel([-1.4, -0.1, 1.2])
+
+    # rueda_trasera_derecha
     plot_wheel([-1.4, -0.1, -1.2])
+
+
+    """"
+    cabina => [0.0, 0.0, 0.0]
+    plataforma_trasera => [0.0, 0.0, 0.0]
+    plataforma_de_giro => [-1.05, 0.25, 0.0]
+    cubo => [-1.04, 0.63, 0]
+    """
 
     # Configuración de ejes
     vpl.plot(np.array([[0, 0, 0], [3, 0, 0]]), color=(0, 255, 0), line_width=10.0, label="X")
