@@ -18,32 +18,32 @@ def transformacion(mesh, translation, rotation_matrix):
     vpl.mesh_plot(mesh_copy)
     return mesh_copy
 
-def rotate_z(angle):
-    radian_angle = np.radians(angle)
-    rotation_matrix = np.array([
-        [np.cos(radian_angle), -np.sin(radian_angle), 0],
-        [np.sin(radian_angle), np.cos(radian_angle), 0],
+def rotate_z(angulo):
+    radianes = np.radians(angulo)
+    matrix_rotacion = np.array([
+        [np.cos(radianes), -np.sin(radianes), 0],
+        [np.sin(radianes), np.cos(radianes), 0],
         [0, 0, 1]
     ])
-    return rotation_matrix
+    return matrix_rotacion
 
-def rotate_y(angle):
-    radian_angle = np.radians(angle)
-    rotation_matrix = np.array([
-        [np.cos(radian_angle), 0, np.sin(radian_angle)],
+def rotate_y(angulo):
+    radianes = np.radians(angulo)
+    matrix_rotacion = np.array([
+        [np.cos(radianes), 0, np.sin(radianes)],
         [0, 1, 0],
-        [-np.sin(radian_angle), 0, np.cos(radian_angle)]
+        [-np.sin(radianes), 0, np.cos(radianes)]
     ])
-    return rotation_matrix
+    return matrix_rotacion
 
-def rotate_x(angle):
-    radian_angle = np.radians(angle)
-    rotation_matrix = np.array([
+def rotate_x(angulo):
+    radianes = np.radians(angulo)
+    matrix_rotacion = np.array([
         [1, 0, 0],
-        [0, np.cos(radian_angle), -np.sin(radian_angle)],
-        [0, np.sin(radian_angle), np.cos(radian_angle)]
+        [0, np.cos(radianes), -np.sin(radianes)],
+        [0, np.sin(radianes), np.cos(radianes)]
     ])
-    return rotation_matrix
+    return matrix_rotacion
 
 Rz = Ry = Rx = np.identity(4)
 def ubi_ruedas(traslacion):
