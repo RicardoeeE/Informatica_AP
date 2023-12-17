@@ -8,44 +8,41 @@ def cargar_fichero(file_path):
 
 def translacion(translation):
     matrix = np.identity(4)
-    matrix[0:3, 3] = translation
+    matrix[0:3, 3] = np.array(translation)
     return matrix
 
-def transformacion(mesh, translation, rotation_matrix):
-    mesh_copy = deepcopy(mesh)
-    transformation_matrix = translacion(translation) @ rotation_matrix
-    mesh_copy.transform(transformation_matrix)
-    vpl.mesh_plot(mesh_copy)
-    return mesh_copy
-
-def rotate_z(angulo):
+def rotate_x(angulo):
     radianes = np.radians(angulo)
     matrix_rotacion = np.array([
-        [np.cos(radianes), -np.sin(radianes), 0],
-        [np.sin(radianes), np.cos(radianes), 0],
-        [0, 0, 1]
+        [1, 0, 0, 0],
+        [0, np.cos(radianes), -np.sin(radianes), 0],
+        [0, np.sin(radianes), np.cos(radianes), 0],
+        [0, 0, 0, 1]
     ])
     return matrix_rotacion
 
 def rotate_y(angulo):
     radianes = np.radians(angulo)
     matrix_rotacion = np.array([
-        [np.cos(radianes), 0, np.sin(radianes)],
-        [0, 1, 0],
-        [-np.sin(radianes), 0, np.cos(radianes)]
+        [np.cos(radianes), 0, np.sin(radianes), 0],
+        [0, 1, 0, 0],
+        [-np.sin(radianes), 0, np.cos(radianes), 0],
+        [0, 0, 0, 1]
     ])
     return matrix_rotacion
 
-def rotate_x(angulo):
+def rotate_z(angulo):
     radianes = np.radians(angulo)
     matrix_rotacion = np.array([
-        [1, 0, 0],
-        [0, np.cos(radianes), -np.sin(radianes)],
-        [0, np.sin(radianes), np.cos(radianes)]
+        [np.cos(radianes), -np.sin(radianes), 0, 0],
+        [np.sin(radianes), np.cos(radianes), 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
     ])
     return matrix_rotacion
 
 Rz = Ry = Rx = np.identity(4)
+
 def ubi_ruedas(traslacion):
     rueda_delantera_izquierda = cargar_fichero("Trabajo/Stl/rueda_delantera_izquierda.stl")
     wheel_copy = deepcopy(rueda_delantera_izquierda)
@@ -53,6 +50,14 @@ def ubi_ruedas(traslacion):
     Tf = tl @ Rz @ Ry @ Rx
     wheel_copy.transform(Tf)
     vpl.mesh_plot(wheel_copy)
+
+def ubi_cubo(traslacion):
+    cubo = cargar_fichero("Trabajo/Stl/Tanque_Mejor2.Stl")
+    cubo_copy = deepcopy(cubo)
+    tl = translacion(traslacion)
+    Tf = tl @ Rz @ Ry @ Rx
+    cubo_copy.transform(Tf)
+    vpl.mesh_plot(cubo_copy)
 
 def main():
     # Carga de modelos
@@ -62,16 +67,7 @@ def main():
     rueda_delantera_derecha = cargar_fichero("Trabajo/Stl/rueda_delantera_derecha.stl")
     rueda_trasera_izquierda = cargar_fichero("Trabajo/Stl/rueda_trasera_izquierda.stl")
     rueda_trasera_derecha = cargar_fichero("Trabajo/Stl/rueda_trasera_derecha.stl")
-    tanque = cargar_fichero("Trabajo/Stl/Tanque_Mejor2.Stl")
-
-    # Concatenación de matrices de vértices y caras
-    origen = stl.mesh.Mesh(np.concatenate([cabina.data, 
-                                           rueda_delantera_derecha.data,
-                                           rueda_delantera_izquierda.data,
-                                           rueda_trasera_izquierda.data,
-                                           rueda_trasera_derecha.data,
-                                           tanque.data
-                                           ]))
+    cubo = cargar_fichero("Trabajo/Stl/Tanque_Mejor2.Stl")
 
     # Función para pintar la máquina
     def paint(dumper):
@@ -88,14 +84,17 @@ def main():
     ubi_ruedas([-1.4, -0.1, 1.2])
     ubi_ruedas([-1.4, -0.1, -1.2])
 
+    # Llamada a la función para fijar la posición del tanque
+    ubi_cubo([ -1.04, 0.63, 0])
+
     # Visualización del escenario
     vpl.QtFigure()        
     vpl.mesh_plot(escenario)
 
     # Animación de la máquina moviéndose
-    n_steps = 200
+    n_steps = 150
     for step in range(n_steps):
-        x = step * 66.0 / n_steps
+        x = step * 55.0 / n_steps
 
         cab = deepcopy(cabina)
         tl = translacion([x, 0.0, 0.0])
@@ -122,33 +121,47 @@ def main():
         tf = (tl @ Rz @ Ry @ Rx) @ tf_cabina
         rueda_d2.transform(tf)
 
-        tanque = deepcopy(tanque)
+        cubo = deepcopy(cubo)
         tl = translacion([-1.04, 0.63, 0])
         tf = (tl @ Rz @ Ry @ Rx) @ tf_cabina
-        tanque.transform(tf)
+        cubo.transform(tf)
 
-        paint([cab, rueda_i, rueda_d, rueda_i2, rueda_d2, tanque])
+        paint([cab, rueda_i, rueda_d, rueda_i2, rueda_d2, cubo])
 
-    # Giro de 90 grados con radio de 11
-    radio = 11.0
-    angulo_giro = np.radians(90)
-    centro_giro = [x + radio, 0.0, 0.0]
+    
 
-    n_steps_giro = 100
-    for step in range(n_steps_giro):
-        angulo = step * angulo_giro / n_steps_giro
-        tl_giro = translacion(centro_giro)
-        rotacion_giro = rotate_y(angulo)
-        tf_giro = tl_giro @ rotacion_giro  # Eliminamos la inversa de tl_giro
+    posicion_final_recto=[55.0,0.0,0.0]
+    # Radio del giro
+    radio_giro = 11.0
+    n_steps_giro = 60
+    for step_giro in range(n_steps_giro):
+        angulo_giro = step_giro * -90.0 / n_steps_giro  # Giro de 90 grados
 
-        cab.transform(tf_giro)
-        rueda_i.transform(tf_giro)
-        rueda_d.transform(tf_giro)
-        rueda_i2.transform(tf_giro)
-        rueda_d2.transform(tf_giro)
-        tanque.transform(tf_giro)
+        cab = deepcopy(cabina)
+        rueda_i = deepcopy(rueda_delantera_izquierda)
+        rueda_d = deepcopy(rueda_delantera_derecha)
+        rueda_i2 = deepcopy(rueda_trasera_izquierda)
+        rueda_d2 = deepcopy(rueda_trasera_derecha)
+        cubo = deepcopy(cubo)
 
-        paint([cab, rueda_i, rueda_d, rueda_i2, rueda_d2, tanque])
+        # Calcula la posición en el círculo
+        x_circulo = posicion_final_recto[0] + radio_giro * -np.cos(np.radians(-90 + angulo_giro))
+
+        # Traslada a la posición circular
+        tl_circular = translacion([x_circulo, 0.0, 0.0])
+
+        # Aplica la rotación justo después de la translación circular
+        tf_cabina = tl_circular @ rotate_y(angulo_giro) @ (Rz @ Ry @ Rx)
+        tf_ruedas = tl_circular @ rotate_y(angulo_giro) @ Rz @ Ry @ Rx
+
+        cab.transform(tf_cabina)
+        rueda_i.transform(tf_ruedas)
+        rueda_d.transform(tf_ruedas)
+        rueda_i2.transform(tf_ruedas)
+        rueda_d2.transform(tf_ruedas)
+        cubo.transform(tf_cabina)
+
+        paint([cab, rueda_i, rueda_d, rueda_i2, rueda_d2, cubo])
 
 
 
@@ -182,7 +195,7 @@ def main():
         tf = (tl @ Rz @ Ry @ Rx) @ tf_cabina
         rueda_d2.transform(tf)
 
-        cubo = deepcopy(tanque)
+        cubo = deepcopy(cubo)
         tl = translacion([-1.04, 0.63, 0])
         tf = (tl @ Rz @ Ry @ Rx) @ tf_cabina
         cubo.transform(tf)
@@ -196,8 +209,13 @@ def main():
     vpl.mesh_plot(rueda_i2)
     vpl.mesh_plot(rueda_d2)
     vpl.mesh_plot(cubo)
+    
+    # Configuración de ejes
+    vpl.plot(np.array([[0, 0, 0], [3, 0, 0]]), color=(0, 255, 0), line_width=10.0, label="X")
+    vpl.plot(np.array([[0, 0, 0], [0, 3, 0]]), color=(0, 0, 255), line_width=10.0, label="Y")
+    vpl.plot(np.array([[0, 0, 0], [0, 0, 3]]), color=(255, 0, 0), line_width=10.0, label="Z")
 
-    mesh_actor = vpl.mesh_plot(origen)
+
     vpl.show()
 
 if __name__ == "__main__":
