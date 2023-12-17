@@ -93,7 +93,7 @@ def main():
     vpl.mesh_plot(escenario)
 
     # Animación de la máquina moviéndose
-    n_steps = 200
+    n_steps = 150
     for step in range(n_steps):
         x = step * 66.0 / n_steps
 
